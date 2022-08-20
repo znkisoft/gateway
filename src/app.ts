@@ -5,7 +5,11 @@ import morgan from "morgan"
 import config from "./config"
 import errorHandler from "./middleware/errorHandler"
 import NotFoundError from "./middleware/notFoundError"
-import root from "./routes/root"
+import {
+  SrvWatchdogHealthRoute,
+  SrvWatchdogRoute,
+} from "./routes/watchdogsrv.route"
+import { SrvSlaveHealthRoute, SrvSlaveRoute } from "./routes/slavesrv.route"
 
 const app = express()
 
@@ -21,10 +25,18 @@ app.use(
 app.use(helmet())
 app.use(morgan("tiny"))
 
-// Apply routes before error handling
-app.use("/", root)
+app.use("/health/watchdogsrv", SrvWatchdogHealthRoute)
+app.use("/health/slavesrv", SrvSlaveHealthRoute)
+app.use("/health/self", (req, res) => {
+  res.json("gateway service is healthy")
+})
 
-// Apply error handling last
+// TODO auth middleware
+
+// proxies
+app.use("/api/watchdogsrv", SrvWatchdogRoute)
+app.use("/api/slavesrv", SrvSlaveRoute)
+
 app.use(NotFoundError)
 app.use(errorHandler)
 
