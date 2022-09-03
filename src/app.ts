@@ -3,13 +3,14 @@ import express from "express"
 import helmet from "helmet"
 import morgan from "morgan"
 import config from "./config"
-import errorHandler from "./middleware/errorHandler"
-import NotFoundError from "./middleware/notFoundError"
+import ErrorMiddleware from "./middleware/error.middleware"
+import NotFoundMiddleware from "./middleware/notFound.middleware"
 import {
   SrvWatchdogHealthRoute,
   SrvWatchdogRoute,
 } from "./routes/watchdogsrv.route"
 import { SrvSlaveHealthRoute, SrvSlaveRoute } from "./routes/slavesrv.route"
+import path from "path"
 
 const app = express()
 
@@ -25,6 +26,9 @@ app.use(
 app.use(helmet())
 app.use(morgan("tiny"))
 
+// serve static files
+app.use(express.static(path.join(__dirname, "..", "public")))
+
 app.use("/health/watchdogsrv", SrvWatchdogHealthRoute)
 app.use("/health/slavesrv", SrvSlaveHealthRoute)
 app.use("/health/self", (req, res) => {
@@ -37,7 +41,7 @@ app.use("/health/self", (req, res) => {
 app.use("/api/watchdogsrv", SrvWatchdogRoute)
 app.use("/api/slavesrv", SrvSlaveRoute)
 
-app.use(NotFoundError)
-app.use(errorHandler)
+app.use(NotFoundMiddleware)
+app.use(ErrorMiddleware)
 
 export default app

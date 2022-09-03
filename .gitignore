@@ -57,3 +57,6 @@ pids
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# credentials
+firebase.json
